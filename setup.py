@@ -15,15 +15,15 @@ setup(
     license='Apache-2.0',
     packages=find_packages(),
     install_requires=['numpy==1.18.1',
-                      'numba==0.47.0',
-                      'dask==2.10.0',
-                      'bokeh==1.4.0',
+                      'numba>=0.48.0',
+                      'dask>=2.10.0',
+                      'bokeh>=1.4.0',
                       'pandas>=0.25.2',
-                      'xarray==0.14.1',
-                      'zarr==2.4.0',
-                      'numcodecs==0.6.4',
-                      'matplotlib==3.1.2',
-                      'sparse==0.9.1'],
+                      'xarray>=0.14.1',
+                      'zarr>=2.4.0',
+                      'numcodecs>=0.6.4',
+                      'matplotlib>=3.1.2',
+                      'sparse>=0.9.1'],
     extras_require={
         'dev': [
             'pylint>=2.4.4'
