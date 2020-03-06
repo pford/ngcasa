@@ -15,7 +15,7 @@ from numba import jit
 import numpy as np
 import math
 
-def grid(vis_dataset, grid_parms):
+def grid(vis_dataset, user_grid_parms):
     """
     Grids visibilities from Visibility Dataset.
     If to_disk is set to true the data is saved to disk.
@@ -24,7 +24,7 @@ def grid(vis_dataset, grid_parms):
     vis_xds : xarray.core.dataset.Dataset
         input Visibility Dataset
     grid_parms : dictionary
-          keys ('chan_mode','imsize','cell','oversampling','support','to_disk','outfile')
+          #keys ('chan_mode','imsize','cell','oversampling','support','to_disk','outfile')
     Returns
     -------
     grid_xds : xarray.core.dataset.Dataset
@@ -38,38 +38,31 @@ def grid(vis_dataset, grid_parms):
     import dask
     import time
     import copy
+    from .synthesis_utils._check_parameters import _check_gridder_params
 
-    # Parameter adjustments
-    grid_parms_copy = copy.deepcopy(grid_parms)
-    padding = 1.2  # Padding factor
-    dtr = np.pi / (3600 * 180)
-    grid_parms_copy['imsize'] = (padding * np.array(grid_parms_copy['imsize'])).astype(int)  # Add padding
-    grid_parms_copy['cell'] = np.array(grid_parms_copy['cell']) * dtr
-    grid_parms_copy['cell'][0] = -grid_parms_copy['cell'][0]
+    grid_parms = copy.deepcopy(user_grid_parms)
+    assert(_check_gridder_params(grid_parms,vis_dataset)), "######### ERROR: Parameter checking failed"
 
-    assert grid_parms_copy['chan_mode'] == 'continuum' or grid_parms_copy[
-        'chan_mode'] == 'cube', 'The chan_mode parameter in grid_parms can only be \'continuum\' or \'cube\'.'
-
-    if grid_parms_copy['chan_mode'] == 'continuum':
+    if grid_parms['chan_mode'] == 'continuum':
         freq_coords = [da.mean(vis_dataset.coords['chan'].values)]
         imag_chan_chunk_size = 1
-    elif grid_parms_copy['chan_mode'] == 'cube':
+    elif grid_parms['chan_mode'] == 'cube':
         freq_coords = vis_dataset.coords['chan'].values
         imag_chan_chunk_size = vis_dataset.DATA.chunks[2][0]
 
     # Create dask graph of gridding
-    grids_and_sum_weights, correcting_cgk_image = _graph_grid(vis_dataset, grid_parms_copy)
+    grids_and_sum_weights, correcting_cgk_image = _graph_grid(vis_dataset, grid_parms)
 
     # Create delayed xarray dataset
     chunks = vis_dataset.DATA.chunks
     n_imag_pol = chunks[3][0]
     grid_dict = {}
-    coords = {'chan': freq_coords, 'pol': np.arange(n_imag_pol), 'u': np.arange(grid_parms_copy['imsize'][0]),
-              'v': np.arange(grid_parms_copy['imsize'][1])}
+    coords = {'chan': freq_coords, 'pol': np.arange(n_imag_pol), 'u': np.arange(grid_parms['imsize_padded'][0]),
+              'v': np.arange(grid_parms['imsize_padded'][1])}
     grid_dict['CORRECTING_CGK'] = xr.DataArray(da.array(correcting_cgk_image), dims=['u', 'v'])
     # grid_dict['VIS_GRID'] = xr.DataArray(grids_and_sum_weights[0], dims=['chan','pol','u', 'v'])
-    grid_dict['VIS_GRID'] = xr.DataArray(grids_and_sum_weights[0], dims=['u', 'v', 'pol', 'chan'])
-    grid_dict['SUM_WEIGHT'] = xr.DataArray(grids_and_sum_weights[1], dims=['pol','chan'])
+    grid_dict['VIS_GRID'] = xr.DataArray(grids_and_sum_weights[0], dims=['u', 'v', 'chan', 'pol'])
+    grid_dict['SUM_WEIGHT'] = xr.DataArray(grids_and_sum_weights[1], dims=['chan','pol'])
     grid_xds = xr.Dataset(grid_dict, coords=coords)
 
     if grid_parms['to_disk'] == True:
@@ -98,7 +91,7 @@ def _graph_grid(vis_dataset, grid_parms):
     import xarray as xr
     import time
     import itertools
-    from cngi.gridding import gridding_convolutional_kernels as gck
+    import ngcasa.synthesis.gridding_convolutional_kernels as gck
     
 
     ##############################
@@ -111,7 +104,7 @@ def _graph_grid(vis_dataset, grid_parms):
     # Creating gridding kernel
     # The support in CASA is defined as the half support, which is 3
     cgk, correcting_cgk_image = gck.create_prolate_spheroidal_kernel(grid_parms['oversampling'], grid_parms['support'],
-                                                                     grid_parms['imsize'])
+                                                                     grid_parms['imsize_padded'])
     cgk_1D = gck.create_prolate_spheroidal_kernel_1D(grid_parms['oversampling'], grid_parms['support'])
 
     # Getting data for gridding
@@ -152,14 +145,14 @@ def _graph_grid(vis_dataset, grid_parms):
             dask.delayed(cgk_1D), dask.delayed(grid_parms))
         if grid_parms['chan_mode'] == 'continuum':
            list_of_grids[0].append(da.from_delayed(sub_grid_and_sum_weights[0], (
-           1, chunk_sizes[3][c_pol], grid_parms['imsize'][0], grid_parms['imsize'][1]),
+           1, chunk_sizes[3][c_pol], grid_parms['imsize_padded'][0], grid_parms['imsize_padded'][1]),
                                                        dtype=np.complex128))
            list_of_sum_weights[0].append(da.from_delayed(sub_grid_and_sum_weights[1],
            (1, chunk_sizes[3][c_pol]),
            dtype=np.float64))
         elif grid_parms['chan_mode'] == 'cube':
             list_of_grids[c_chan].append(da.from_delayed(sub_grid_and_sum_weights[0], (
-            chunk_sizes[2][c_chan], chunk_sizes[3][c_pol], grid_parms['imsize'][0], grid_parms['imsize'][1]),
+            chunk_sizes[2][c_chan], chunk_sizes[3][c_pol], grid_parms['imsize_padded'][0], grid_parms['imsize_padded'][1]),
                                                         dtype=np.complex128))
             list_of_sum_weights[c_chan].append(da.from_delayed(sub_grid_and_sum_weights[1],
             (chunk_sizes[2][c_chan], chunk_sizes[3][c_pol]),
@@ -181,9 +174,9 @@ def _graph_grid(vis_dataset, grid_parms):
     #list_of_grids_and_sum_weights[0] = da.moveaxis(list_of_grids_and_sum_weights[0], [-2, -1],
     #                                                            [0, 1])
     list_of_grids_and_sum_weights[0] = da.moveaxis(list_of_grids_and_sum_weights[0], [0, 1],
-                                                                [-1, -2])
+                                                                [-2, -1])
     
-    list_of_grids_and_sum_weights[1] = da.moveaxis(list_of_grids_and_sum_weights[1],[0, 1], [-1, -2])
+    list_of_grids_and_sum_weights[1] = da.moveaxis(list_of_grids_and_sum_weights[1],[0, 1], [-2, -1])
     
     return list_of_grids_and_sum_weights, correcting_cgk_image
     
@@ -244,7 +237,7 @@ def _standard_grid_dask(vis_data, uvw, weight, flag_row, flag, freq_chan, cgk_1D
     n_imag_pol = vis_data.shape[3]
     pol_map = (np.arange(0, n_imag_pol)).astype(np.int)
 
-    n_uv = grid_parms['imsize']
+    n_uv = grid_parms['imsize_padded']
     delta_lm = grid_parms['cell']
     oversampling = grid_parms['oversampling']
     support = grid_parms['support']

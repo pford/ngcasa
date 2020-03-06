@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-def dirty_image(vis_dataset, grid_parms):
+def dirty_image(vis_dataset, user_grid_parms):
     """
     Grids visibilities from Visibility Dataset and returns dirty Image Dataset.
     If to_disk is set to true the data is saved to disk.
@@ -42,7 +42,13 @@ def dirty_image(vis_dataset, grid_parms):
     import copy, os
     from numcodecs import Blosc
     from itertools import cycle
-
+    from .synthesis_utils._check_parameters import _check_gridder_params
+    
+    grid_parms = copy.deepcopy(user_grid_parms)
+    assert(_check_gridder_params(grid_parms,vis_dataset)), "######### ERROR: Parameter checking failed"
+    
+    
+    '''
     # Parameter adjustments
     grid_parms_dirty_image = copy.deepcopy(grid_parms)
     padding = 1.2  # Padding factor
@@ -54,8 +60,9 @@ def dirty_image(vis_dataset, grid_parms):
 
     assert grid_parms_dirty_image['chan_mode'] == 'continuum' or grid_parms_dirty_image[
         'chan_mode'] == 'cube', 'The chan_mode parameter in grid_parms can only be \'continuum\' or \'cube\'.'
+    '''
     
-    grids_and_sum_weights, correcting_cgk_image = _graph_grid(vis_dataset, grid_parms_dirty_image)
+    grids_and_sum_weights, correcting_cgk_image = _graph_grid(vis_dataset, grid_parms)
     
 
     # uncorrected_dirty_image = dafft.fftshift(dafft.ifft2(dafft.ifftshift(grids_and_sum_weights[0], axes=(2,3)), axes=(2,3)), axes=(2,3))
@@ -63,8 +70,8 @@ def dirty_image(vis_dataset, grid_parms):
     uncorrected_dirty_image = dafft.fftshift(
         dafft.ifft2(dafft.ifftshift(grids_and_sum_weights[0], axes=(0, 1)), axes=(0, 1)), axes=(0, 1))
     uncorrected_dirty_image = uncorrected_dirty_image.real * (
-            grid_parms_dirty_image['imsize'][0] * grid_parms_dirty_image['imsize'][1])
-
+            grid_parms['imsize_padded'][0] * grid_parms['imsize_padded'][1])
+    
     def correct_image(uncorrected_dirty_image, sum_weights, correcting_cgk):
         sum_weights[sum_weights == 0] = 1
         # corrected_image = (uncorrected_dirty_image/sum_weights[:,:,None,None])/correcting_cgk[None,None,:,:]
@@ -75,16 +82,15 @@ def dirty_image(vis_dataset, grid_parms):
                                           correcting_cgk_image)  # ? has to be .data to paralize correctly
    
     #Remove Padding
-    print(grid_parms)
     n_xy = (np.array(grid_parms['imsize'])).astype(np.int)
-    n_xy_padded = (padding*n_xy).astype(int)
+    n_xy_padded = (grid_parms['gridder_padding']*n_xy).astype(int)
     start_xy = (n_xy_padded // 2 - n_xy // 2)
     end_xy = start_xy + n_xy
 
-    if grid_parms_dirty_image['chan_mode'] == 'continuum':
+    if grid_parms['chan_mode'] == 'continuum':
         freq_coords = [da.mean(vis_dataset.coords['chan'].values)]
         imag_chan_chunk_size = 1
-    elif grid_parms_dirty_image['chan_mode'] == 'cube':
+    elif grid_parms['chan_mode'] == 'cube':
         freq_coords = vis_dataset.coords['chan'].values
         imag_chan_chunk_size = vis_dataset.DATA.chunks[2][0]
 
@@ -96,8 +102,8 @@ def dirty_image(vis_dataset, grid_parms):
     dirty_image_dict['CORRECTING_CGK'] = xr.DataArray(da.array(correcting_cgk_image[start_xy[0]:end_xy[0], start_xy[1]:end_xy[1]]), dims=['d0', 'd1'])
     # dirty_image_dict['VIS_GRID'] = xr.DataArray(grids_and_sum_weights[0], dims=['chan','pol','u', 'v'])
     #dirty_image_dict['VIS_GRID'] = xr.DataArray(grids_and_sum_weights[0], dims=['d0', 'd1', 'chan', 'pol'])
-    dirty_image_dict['SUM_WEIGHT'] = xr.DataArray(grids_and_sum_weights[1], dims=['pol','chan'])
-    dirty_image_dict['DIRTY_IMAGE'] = xr.DataArray(corrected_dirty_image[start_xy[0]:end_xy[0], start_xy[1]:end_xy[1],:,:], dims=['d0', 'd1', 'pol', 'chan'])
+    dirty_image_dict['SUM_WEIGHT'] = xr.DataArray(grids_and_sum_weights[1], dims=['chan','pol'])
+    dirty_image_dict['DIRTY_IMAGE'] = xr.DataArray(corrected_dirty_image[start_xy[0]:end_xy[0], start_xy[1]:end_xy[1],:,:], dims=['d0', 'd1', 'chan', 'pol'])
     dirty_image_xds = xr.Dataset(dirty_image_dict, coords=coords)
     
     if grid_parms['to_disk'] == True:
