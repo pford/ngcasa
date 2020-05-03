@@ -5,7 +5,7 @@ with open('README.md', "r") as fid:   #encoding='utf-8'
 
 setup(
     name='ngcasa',
-    version='0.0.3',
+    version='0.0.4',
     description='Next Generation CASA',
     long_description=long_description,
     long_description_content_type="text/markdown",
