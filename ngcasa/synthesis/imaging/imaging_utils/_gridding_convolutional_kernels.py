@@ -30,7 +30,7 @@ def _coordinates2(npixel: int):
     return (np.mgrid[0:npixel, 0:npixel] - npixel // 2) / npixel
 
 
-def create_prolate_spheroidal_kernel(oversampling, support, n_uv):
+def _create_prolate_spheroidal_kernel(oversampling, support, n_uv):
     """
     Create PSWF to serve as gridding kernel
 
@@ -65,7 +65,7 @@ def create_prolate_spheroidal_kernel(oversampling, support, n_uv):
 
     kernel_points_1D = kernel_points_1D / support_center
 
-    _, kernel_1D = prolate_spheroidal_function(kernel_points_1D)
+    _, kernel_1D = _prolate_spheroidal_function(kernel_points_1D)
     # kernel_1D /= np.sum(np.real(kernel_1D[oversampling_center,:]))
 
     if (oversampling % 2) == 0:
@@ -83,10 +83,10 @@ def create_prolate_spheroidal_kernel(oversampling, support, n_uv):
 
     # Gridding correction function (applied after dirty image is created)
     kernel_image_points_1D_u = np.abs(2.0 * _coordinates(n_uv[0]))
-    kernel_image_1D_u = prolate_spheroidal_function(kernel_image_points_1D_u)[0]
+    kernel_image_1D_u = _prolate_spheroidal_function(kernel_image_points_1D_u)[0]
 
     kernel_image_points_1D_v = np.abs(2.0 * _coordinates(n_uv[1]))
-    kernel_image_1D_v = prolate_spheroidal_function(kernel_image_points_1D_v)[0]
+    kernel_image_1D_v = _prolate_spheroidal_function(kernel_image_points_1D_v)[0]
 
     kernel_image = np.outer(kernel_image_1D_u, kernel_image_1D_v)
 
@@ -96,7 +96,7 @@ def create_prolate_spheroidal_kernel(oversampling, support, n_uv):
     return kernel, kernel_image
 
 
-def prolate_spheroidal_function(u):
+def _prolate_spheroidal_function(u):
     """
     Calculate PSWF using an old SDE routine re-written in Python
 
@@ -146,11 +146,11 @@ def prolate_spheroidal_function(u):
     return grdsf, (1 - u ** 2) * grdsf
 
 
-def create_prolate_spheroidal_kernel_1D(oversampling, support):
+def _create_prolate_spheroidal_kernel_1D(oversampling, support):
     support_center = support // 2
     oversampling_center = oversampling // 2
     u = np.arange(oversampling * (support_center)) / (support_center * oversampling)
 
     long_half_kernel_1D = np.zeros(oversampling * (support_center + 1))
-    _, long_half_kernel_1D[0:oversampling * (support_center)] = prolate_spheroidal_function(u)
+    _, long_half_kernel_1D[0:oversampling * (support_center)] = _prolate_spheroidal_function(u)
     return long_half_kernel_1D
