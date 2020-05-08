@@ -196,10 +196,9 @@ def calc_briggs_weights(vis_dataset,imaging_weights_parms,storage_parms):
             briggs_factors = np.zeros((2,1,1)+sum_weight.shape)
             briggs_factors[0,0,0,:,:] = np.ones((1,1,1)+sum_weight.shape)
             
-        
         return briggs_factors
-
-    briggs_factors = da.map_blocks(calculate_briggs_parms,grid_of_imaging_weights,sum_weight, imaging_weights_parms,chunks=(2,1,1,128,1),dtype=np.double)[:,0,0,:,:]
+    
+    briggs_factors = da.map_blocks(calculate_briggs_parms,grid_of_imaging_weights,sum_weight, imaging_weights_parms,chunks=(2,1,1)+sum_weight.chunksize,dtype=np.double)[:,0,0,:,:]
     
     imaging_weight = _graph_standard_degrid(vis_dataset, grid_of_imaging_weights, briggs_factors, cgk_1D, grid_parms)
     
