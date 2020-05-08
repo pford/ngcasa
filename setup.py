@@ -5,7 +5,7 @@ with open('README.md', "r") as fid:   #encoding='utf-8'
 
 setup(
     name='ngcasa',
-    version='0.0.5',
+    version='0.0.6',
     description='Next Generation CASA',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -14,7 +14,8 @@ setup(
     url='https://github.com/casangi/ngcasa',
     license='Apache-2.0',
     packages=find_packages(),
-    install_requires=['numpy==1.18.1',
+    install_requires=['cngi_prototype>=0.0.49',
+                      'numpy==1.18.1',
                       'numba==0.48.0',
                       'dask>=2.10.0',
                       'bokeh>=1.4.0',

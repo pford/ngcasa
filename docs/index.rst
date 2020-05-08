@@ -1,11 +1,21 @@
-CASA Next Generation Infrastructure
-====================
+Next Generation CASA
+===================================
 
-.. mdinclude:: ../README.md
+A project to replace the current CASA code base with a parallel,
+scalable Python-based solution.
+
+.. image:: casa_logo.png
+   :width: 250px
+   :align: left
 
 .. toctree::
-   :maxdepth: 1
+   :hidden:
+   :maxdepth: 3
 
    readme
-   simulator
-   synthesis
+   calibration
+   flagging
+   imaging
+   simulation
+   api
+   about
