@@ -61,12 +61,9 @@ def make_imaging_weights(vis_dataset, user_imaging_weights_parms,user_storage_pa
     from itertools import cycle
     import zarr
     
-    from ..synthesis_utils._cngi_check_parameters import _check_imaging_weights_parms, _check_storage_parms
-    from ..synthesis_utils._cngi_funcs import _remove_padding, _add_data_variable_to_dataset, _to_storage
-    
-    from .imaging_utils._standard_grid import _graph_standard_grid
-    from .imaging_utils._gridding_convolutional_kernels import _create_prolate_spheroidal_kernel, _create_prolate_spheroidal_kernel_1D
-    
+    from ngcasa._ngcasa_utils._check_parms import _check_storage_parms
+    from ._imaging_utils._check_imaging_parms import _check_imaging_weights_parms, _check_storage_parms
+    from cngi.dio import write_zarr, append_zarr
     
     imaging_weights_parms =  copy.deepcopy(user_imaging_weights_parms)
     storage_parms =  copy.deepcopy(user_storage_parms)
@@ -107,23 +104,25 @@ def make_imaging_weights(vis_dataset, user_imaging_weights_parms,user_storage_pa
     
     ### Storing imaging weight code
     if  storage_parms['to_disk']:
-        storage_parms['function_name'] = 'make_imaging_weights'
+        storage_parms['graph_name'] = 'make_imaging_weights'
         storage_parms['data_variable_name'] = imaging_weights_parms['imaging_weight_name']
-    
+        
         if storage_parms['append']:
             print('Atempting to add ', storage_parms['data_variable_name']  , ' to ', storage_parms['outfile'])
             imaging_weight = vis_dataset[storage_parms['data_variable_name']].data
             #try:
             if True:
-                storage_parms['array_dimensions'] = ['time', 'baseline', 'chan', 'pol']
-                vis_dataset = _add_data_variable_to_dataset(vis_dataset,imaging_weight,storage_parms)
+                #storage_parms['array_dimensions'] = ['time', 'baseline', 'chan', 'pol']
+                #vis_dataset = _add_data_variable_to_dataset(vis_dataset,imaging_weight,storage_parms)
+                vis_dataset = append_zarr(vis_dataset, storage_parms['outfile'],[imaging_weight],[storage_parms['data_variable_name']],[['time', 'baseline', 'chan', 'pol']],graph_name=storage_parms['graph_name'])
                 print('##################### Finished appending imaging_weights #####################')
                 return vis_dataset
             #except Exception:
             #    print('ERROR : Could not append ', storage_parms['data_variable_name'], 'to', storage_parms['outfile'])
         else:
             print('Saving dataset to ', storage_parms['outfile'])
-            vis_dataset = _to_storage(vis_dataset, storage_parms)
+            #vis_dataset = _to_storage(vis_dataset, storage_parms)
+            write_zarr(vis_dataset, outfile=storage_parms['outfile'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
             print('##################### Created new dataset with imaging_weights #####################')
             return vis_dataset
             
@@ -158,7 +157,7 @@ def _match_array_shape(array_to_reshape,array_to_match):
 def calc_briggs_weights(vis_dataset,imaging_weights_parms,storage_parms):
     import dask.array as da
     import xarray as xr
-    from .imaging_utils._standard_grid import _graph_standard_grid, _graph_standard_degrid
+    from ._imaging_utils._standard_grid import _graph_standard_grid, _graph_standard_degrid
     
     
     dtr = np.pi / (3600 * 180)

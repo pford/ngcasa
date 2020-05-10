@@ -51,11 +51,12 @@ def make_dirty_image(vis_dataset, user_grid_parms, user_storage_parms):
     from numcodecs import Blosc
     from itertools import cycle
     
-    from ..synthesis_utils._cngi_check_parameters import _check_grid_params, _check_storage_parms
-    from ..synthesis_utils._cngi_funcs import _remove_padding, _to_storage, _add_data_variables_to_dataset
-    
-    from .imaging_utils._standard_grid import _graph_standard_grid
-    from .imaging_utils._gridding_convolutional_kernels import _create_prolate_spheroidal_kernel, _create_prolate_spheroidal_kernel_1D
+    from cngi.dio import write_zarr, append_zarr
+    from ngcasa._ngcasa_utils._check_parms import _check_storage_parms
+    from ._imaging_utils._check_imaging_parms import _check_grid_params, _check_storage_parms
+    from ._imaging_utils._gridding_convolutional_kernels import _create_prolate_spheroidal_kernel, _create_prolate_spheroidal_kernel_1D
+    from ._imaging_utils._standard_grid import _graph_standard_grid
+    from .._synthesis_utils._remove_padding import _remove_padding
     
     grid_parms = copy.deepcopy(user_grid_parms)
     storage_parms = copy.deepcopy(user_storage_parms)
@@ -105,9 +106,9 @@ def make_dirty_image(vis_dataset, user_grid_parms, user_storage_parms):
     image_dataset = xr.Dataset(image_dict, coords=coords)
     
     
-    ### Storing psf image code
+    ### Storing dirty image image code
     if  storage_parms['to_disk']:
-        storage_parms['function_name'] = 'make_dirty_image'
+        storage_parms['graph_name'] = 'make_dirty_image'
         
         if storage_parms['append']:
             storage_parms['list_data_variable_name'] = [grid_parms['image_name'], grid_parms['sum_weight_name']]
@@ -117,16 +118,18 @@ def make_dirty_image(vis_dataset, user_grid_parms, user_storage_parms):
             storage_parms['list_array_dimensions'] = [['d0', 'd1', 'chan', 'pol'],['chan', 'pol']]
             #try:
             if True:
-                image_dataset = _add_data_variables_to_dataset(image_dataset,list_arrays,storage_parms)
-                print('##################### Finished appending psf #####################')
+                #image_dataset = _add_data_variables_to_dataset(image_dataset,list_arrays,storage_parms)
+                image_dataset = append_zarr(image_dataset, storage_parms['outfile'],list_arrays,storage_parms['list_data_variable_name'],storage_parms['list_array_dimensions'],graph_name=storage_parms['graph_name'])
+                print('##################### Finished appending dirty image #####################')
                 return image_dataset
             #except Exception:
             #    print('ERROR : Could not append ', storage_parms['list_data_variable_name'], 'to', storage_parms['outfile'])
         else:
             print('Saving dataset to ', storage_parms['outfile'])
-            image_dataset = _to_storage(image_dataset, storage_parms)
-            print('##################### Created new dataset with make_psf #####################')
+            #image_dataset = _to_storage(image_dataset, storage_parms)
+            write_zarr(image_dataset, outfile=storage_parms['outfile'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
+            print('##################### Created new dataset with make_dirty_image #####################')
             return image_dataset
     
-    print('##################### created graph for make_psf #####################')
+    print('##################### created graph for make_dirty_image #####################')
     return image_dataset
