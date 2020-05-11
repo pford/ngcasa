@@ -1,4 +1,4 @@
-Synthesis Imaging
+Imaging
 ====================
 
 .. automodsumm:: ngcasa.synthesis.imaging

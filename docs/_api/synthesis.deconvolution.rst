@@ -1,4 +1,4 @@
-Synthesis Deconvolution
+Deconvolution
 ====================
 
 .. automodsumm:: ngcasa.synthesis.deconvolution
