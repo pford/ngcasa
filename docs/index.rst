@@ -18,4 +18,5 @@ scalable Python-based solution.
    imaging
    simulation
    api
+   verification
    about
