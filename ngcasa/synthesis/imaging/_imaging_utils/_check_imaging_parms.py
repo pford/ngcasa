@@ -20,7 +20,7 @@ from ngcasa._ngcasa_utils._check_parms import _check_parms, _check_dataset, _che
 def _check_grid_params(vis_dataset, grid_parms, default_image_name='DIRTY_IMAGE', default_sum_weight_name='SUM_WEIGHT'):
     import numbers
     parms_passed = True
-    dtr = np.pi / (3600 * 180)
+    arc_sec_to_rad = np.pi / (3600 * 180)
 
     n_chunks_in_each_dim = vis_dataset.DATA.data.numblocks
     
@@ -57,7 +57,7 @@ def _check_grid_params(vis_dataset, grid_parms, default_image_name='DIRTY_IMAGE'
         grid_parms['imsize'] = np.array(grid_parms['imsize']).astype(int)
         grid_parms['imsize_padded'] = (grid_parms['fft_padding']* grid_parms['imsize']).astype(int)
 
-        grid_parms['cell'] = dtr * np.array(grid_parms['cell'])
+        grid_parms['cell'] = arc_sec_to_rad * np.array(grid_parms['cell'])
         grid_parms['cell'][0] = -grid_parms['cell'][0]
         
         grid_parms['complex_grid'] = True
@@ -68,7 +68,7 @@ def _check_grid_params(vis_dataset, grid_parms, default_image_name='DIRTY_IMAGE'
 def _check_imaging_weights_parms(vis_dataset, imaging_weights_parms):
     import numbers
     parms_passed = True
-    dtr = np.pi / (3600 * 180)
+    arc_sec_to_rad = np.pi / (3600 * 180)
     
     if not(_check_parms(imaging_weights_parms, 'data_name', [str], default='DATA')): parms_passed = False
     if not(_check_dataset(vis_dataset,imaging_weights_parms['data_name'])): parms_passed = False
@@ -94,7 +94,7 @@ def _check_imaging_weights_parms(vis_dataset, imaging_weights_parms):
     if parms_passed == True:
         imaging_weights_parms['imsize'] = np.array(imaging_weights_parms['imsize']).astype(int)
 
-        imaging_weights_parms['cell'] = dtr * np.array(imaging_weights_parms['cell'])
+        imaging_weights_parms['cell'] = arc_sec_to_rad * np.array(imaging_weights_parms['cell'])
         imaging_weights_parms['cell'][0] = -imaging_weights_parms['cell'][0]
         
     

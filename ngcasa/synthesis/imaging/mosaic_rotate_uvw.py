@@ -12,31 +12,21 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#Allow setting of padding grid_parms['gridder_padding'] = gridder_padding
-#Setting to keep grid or correcting
-#normalizarion parameters (flat sky, flat noise etc)
-#mosaic parameters, etc
-#Allow users to append image to existing img.zarr
-#storage_parms['append'], user_grid_parms['data_variable_name']
-
-#Units not specified, for example  arcsecond, Jy ect
 def mosaic_rotate_uvw(vis_dataset, global_dataset, user_rotation_parms,user_storage_parms):
     """
-    Rotate uvw with facetting style rephasing for multifield mosaic.
+    ********* Experimental Function *************
+    Rotate uvw with faceting style rephasing for multifield mosaic.
     The specified phasecenter and field phase centers are assumed to be in the same frame.
-    This does not currently handle emphemeris objects or objects within nearfield.
+    This does not support east-west arrays, emphemeris objects or objects within the nearfield.
     (no refocus).
     
     Parameters
     ----------
     vis_dataset : xarray.core.dataset.Dataset
         input Visibility Dataset
-    user_storage_parms : dictionary
     Returns
     -------
     psf_dataset : xarray.core.dataset.Dataset
-    
-    rotate_parameters: east_west_array_flag
     """
     #based on UVWMachine and FTMachine
     #measures/Measures/UVWMachine.cc

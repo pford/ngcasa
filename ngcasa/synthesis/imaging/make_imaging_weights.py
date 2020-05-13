@@ -12,41 +12,54 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#Allow setting of padding
-#Setting to keep grid or correcting
-#normalizarion parameters (flat sky, flat noise etc)
-#mosaic parameters, etc
-
-import numpy as np
-
-#user_imaging_weights_parms
-#imaging_weights_parms['weighting'] = 'natural'/'uniform'/'briggs'/'briggs_abs'  ^&^& change
-#imaging_weights_parms['robust'] = float, acceptable values [-2,2]
-#imaging_weights_parms['uvw_name'] = 'UVW'
-#imaging_weights_parms['data_name'] = 'DATA'
-#imaging_weights_parms['chan_mode'] = 'continuum'/'cube'
-#imaging_weights_parms['imsize'] = 2 element list/array of int
-#imaging_weights_parms['cell']  = 2 element list/array of float
-#imaging_weights_parms['imaging_weight_name'] = 'IMAGING_WEIGHT'   ^&^& change to imaging_weights_parms and change to
-
-#storage_parms
-#storage_parms['to_disk'] = True/Flase
-#storage_parms['append'] = True/False
-#storage_parms['outfile'] = string file name and path
-#storage_parms['compressor'] = Blosc(cname='zstd', clevel=2, shuffle=0)
 
 def make_imaging_weights(vis_dataset, user_imaging_weights_parms,user_storage_parms):
     """
+    Creates the imaging weight data variable that has dimensions time x baseline x chan x pol (matches the visibility data variable).
+    The weight density can be averaged over channels or calculated independently for each channel using imaging_weights_parms['chan_mode'].
+    The following imaging weighting schemes are supported 'natural', 'uniform', 'briggs', 'briggs_abs'.
+    The imaging_weights_parms['imsize'] and imaging_weights_parms['cell'] should usually be the same values that will be used for subsequent synthesis blocks (for example making the psf).
+    To achieve something similar to 'superuniform' weighting in CASA tclean imaging_weights_parms['imsize'] and imaging_weights_parms['cell'] can be varied relative to the values used in subsequent synthesis blocks.
+    
     Parameters
     ----------
-    vis_xds : xarray.core.dataset.Dataset
-        input Visibility Dataset
+    vis_dataset : xarray.core.dataset.Dataset
+        Input visibility dataset.
     user_imaging_weights_parms : dictionary
-          keys ('chan_mode','imsize','cell','oversampling','support','to_disk','outfile')
+    user_imaging_weights_parms['weighting'] : {'natural', 'uniform', 'briggs', 'briggs_abs'}, default = natural
+        Weighting scheme used for creating the imaging weights.
+    user_imaging_weights_parms['imsize'] : list of int, length = 2
+        The size of the grid for gridding the imaging weights. Used when imaging_weights_parms['weighting'] is not 'natural'.
+    user_imaging_weights_parms['cell']  : list of number, length = 2, units = arcseconds
+        The size of the pixels in the fft of the grid (the image domain pixel size). Used when imaging_weights_parms['weighting'] is not 'natural'.
+    user_imaging_weights_parms['robust'] : number, acceptable range [-2,2], default = 0.5
+        Robustness parameter for Briggs weighting.
+        robust = -2.0 maps to uniform weighting.
+        robust = +2.0 maps to natural weighting.
+    user_imaging_weights_parms['briggs_abs_noise'] : number, default=1.0
+        Noise parameter for imaging_weights_parms['weighting']='briggs_abs' mode weighting.
+    user_imaging_weights_parms['chan_mode'] : {'continuum'/'cube'}, default = 'continuum'
+        When 'cube' the weights are calculated independently for each channel (perchanweightdensity=True in CASA tclean) and when 'continuum' a common weight density is calculated for all channels.
+    user_imaging_weights_parms['uvw_name'] : str, default ='UVW'
+        The name of uvw data variable that will be used to grid the weights. Used when imaging_weights_parms['weighting'] is not 'natural'.
+    user_imaging_weights_parms['data_name'] : str, default = 'DATA'
+        The name of the visibility data variable whose dimensions will be used to construct the imaging weight data variable.
+    user_imaging_weights_parms['imaging_weight_name'] : str, default ='IMAGING_WEIGHT'
+        The name of that will be used for the imaging weight data variable.
+    user_storage_parms : dictionary
+    user_storage_parms['to_disk'] : bool, default = False
+        If true the dask graph is executed and saved to disk in the zarr format.
+    user_storage_parms['append'] : bool, default = False
+        If storage_parms['to_disk'] is True only the dask graph associated with the function is executed and the resulting data variables are saved to an existing zarr file on disk.
+        Note that graphs on unrelated data to this function will not be executed or saved.
+    user_storage_parms['outfile'] : str
+        The zarr file to create or append to.
+    user_storage_parms['compressor'] : numcodecs.blosc.Blosc,default=Blosc(cname='zstd', clevel=2, shuffle=0)
+    
     Returns
     -------
-    dirty_image_xds : xarray.core.dataset.Dataset
-
+    vis_dataset : xarray.core.dataset.Dataset
+        The vis_dataset will contain a new data variable for the imaging weights the name is defined by the input parameter imaging_weights_parms['imaging_weight_name'].
     """
     print('######################### Start make_imaging_weights #########################')
     import time
@@ -101,7 +114,6 @@ def make_imaging_weights(vis_dataset, user_imaging_weights_parms,user_storage_pa
     if imaging_weights_parms['weighting'] != 'natural':
         calc_briggs_weights(vis_dataset,imaging_weights_parms,storage_parms)
         
-    
     ### Storing imaging weight code
     if  storage_parms['to_disk']:
         storage_parms['graph_name'] = 'make_imaging_weights'
@@ -110,18 +122,14 @@ def make_imaging_weights(vis_dataset, user_imaging_weights_parms,user_storage_pa
         if storage_parms['append']:
             print('Atempting to add ', storage_parms['data_variable_name']  , ' to ', storage_parms['outfile'])
             imaging_weight = vis_dataset[storage_parms['data_variable_name']].data
-            #try:
-            if True:
-                #storage_parms['array_dimensions'] = ['time', 'baseline', 'chan', 'pol']
-                #vis_dataset = _add_data_variable_to_dataset(vis_dataset,imaging_weight,storage_parms)
+            try:
                 vis_dataset = append_zarr(vis_dataset, storage_parms['outfile'],[imaging_weight],[storage_parms['data_variable_name']],[['time', 'baseline', 'chan', 'pol']],graph_name=storage_parms['graph_name'])
                 print('##################### Finished appending imaging_weights #####################')
                 return vis_dataset
-            #except Exception:
-            #    print('ERROR : Could not append ', storage_parms['data_variable_name'], 'to', storage_parms['outfile'])
+            except Exception:
+                print('ERROR : Could not append ', storage_parms['data_variable_name'], 'to', storage_parms['outfile'])
         else:
             print('Saving dataset to ', storage_parms['outfile'])
-            #vis_dataset = _to_storage(vis_dataset, storage_parms)
             write_zarr(vis_dataset, outfile=storage_parms['outfile'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
             print('##################### Created new dataset with imaging_weights #####################')
             return vis_dataset
@@ -157,6 +165,7 @@ def _match_array_shape(array_to_reshape,array_to_match):
 def calc_briggs_weights(vis_dataset,imaging_weights_parms,storage_parms):
     import dask.array as da
     import xarray as xr
+    import numpy as np
     from ._imaging_utils._standard_grid import _graph_standard_grid, _graph_standard_degrid
     
     

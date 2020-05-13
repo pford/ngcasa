@@ -12,24 +12,24 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-def calc_image_cell_size(vis_xds, min_dish_diameter):
+def calc_image_cell_size(vis_dataset, global_dataset,pixels_per_beam=7):
     """
-    Calculates an appropriate number of pixels and and cell size for imaging a measurement set.
+    Calculates the image and and cell size needed for imaging a vis_dataset.
     It uses the perfectly-illuminated circular aperture approximation to determine the field of view
-    and 7 pixel per beam for the cell size.
+    and pixels_per_beam for the cell size.
 
     Parameters
     ----------
-    vis_xds : xarray.core.dataset.Dataset
-        input Visibility Dataset
-    min_dish_diameter : float
-        smallest antenna diameter
+    vis_dataset : xarray.core.dataset.Dataset
+        Input visibility dataset.
+    global_dataset : xarray.core.dataset.Dataset
+        Input global dataset (needed for antenna diameter).
     Returns
     -------
     imsize : list of ints
-        number of pixels for each spatial dimension. 
-    cell : list of ints
-        Cell size is arcseconds.
+        Number of pixels for each spatial dimension.
+    cell : list of ints, units = arcseconds
+        Cell size.
     """
     import xarray
     import numpy as np
@@ -37,14 +37,14 @@ def calc_image_cell_size(vis_xds, min_dish_diameter):
     rad_to_arc = (3600 * 180) / np.pi  # Radians to arcseconds
     c = 299792458
 
-    f_min = da.nanmin(vis_xds.chan)
-    f_max = da.nanmax(vis_xds.chan)
-    # D_min = np.nanmin(global_xds.ANT_DISH_DIAMETER)
-    D_min = min_dish_diameter
+    f_min = da.nanmin(vis_dataset.chan)
+    f_max = da.nanmax(vis_dataset.chan)
+    D_min = np.nanmin(global_dataset.ANT_DISH_DIAMETER)
+    #D_min = min_dish_diameter
 
-    # Calculate cell size using 7 pixels per beam
+    # Calculate cell size using pixels_per_beam
     cell = rad_to_arc * np.array(
-        [c / (da.nanmax(vis_xds.UVW[:, :, 0].data) * f_max), c / (da.nanmax(vis_xds.UVW[:, :, 1].data) * f_max)]) / 7
+        [c / (da.nanmax(vis_dataset.UVW[:, :, 0].data) * f_max), c / (da.nanmax(vis_dataset.UVW[:, :, 1].data) * f_max)]) / pixels_per_beam
 
     # If cell sizes are within 20% of each other use the smaller cell size for both.
     if (cell[0] / cell[1] < 1.2) and (cell[1] / cell[0] < 1.2):

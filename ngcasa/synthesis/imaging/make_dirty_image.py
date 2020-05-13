@@ -12,29 +12,51 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#Allow setting of padding grid_parms['gridder_padding'] = gridder_padding
-#Setting to keep grid or correcting
-#normalizarion parameters (flat sky, flat noise etc)
-#mosaic parameters, etc
-#Allow users to append image to existing img.zarr
-#storage_parms['append'], user_grid_parms['data_variable_name']
-
-#Units not specified, for example  arcsecond, Jy ect
-
-
 def make_dirty_image(vis_dataset, user_grid_parms, user_storage_parms):
     """
-    Grids visibilities from Visibility Dataset and returns dirty Image Dataset.
-    If to_disk is set to true the data is saved to disk.
+    Creates a cube or continuum dirty image from the user specified visibility, uvw and imaging weight data. Only the prolate spheroidal convolutional gridding function is supported (this will change in a future releases.)
+    
     Parameters
     ----------
     vis_dataset : xarray.core.dataset.Dataset
-        input Visibility Dataset
-    grid_parms : dictionary
-          keys ('chan_mode','imsize','cell','oversampling','support','to_disk','outfile')
+        Input visibility dataset.
+    user_grid_parms : dictionary
+    user_grid_parms['imsize'] : list of int, length = 2
+        The image size (no padding).
+    user_grid_parms['cell']  : list of number, length = 2, units = arcseconds
+        The image cell size.
+    user_grid_parms['chan_mode'] : {'continuum'/'cube'}, default = 'continuum'
+        Create a continuum or cube image.
+    user_grid_parms['oversampling'] : int, default = 100
+        The oversampling used for the convolutional gridding kernel. This will be removed in a later release and incorporated in the function that creates gridding convolutional kernels.
+    user_grid_parms['support'] : int, default = 7
+        The full support used for convolutional gridding kernel. This will be removed in a later release and incorporated in the function that creates gridding convolutional kernels.
+    user_grid_parms['fft_padding'] : number, acceptable range [1,100], default = 1.2
+        The factor that determines how much the gridded visibilities are padded before the fft is done.
+    user_grid_parms['uvw_name'] : str, default ='UVW'
+        The name of uvw data variable that will be used to grid the visibilities.
+    user_grid_parms['data_name'] : str, default = 'DATA'
+        The name of the visibility data to be gridded.
+    user_grid_parms['imaging_weight_name'] : str, default ='IMAGING_WEIGHT'
+        The name of the imaging weights to be used.
+    user_grid_parms['image_name'] : str, default ='DIRTY_IMAGE'
+        The created image name.
+    user_grid_parms['sum_weight_name'] : str, default ='SUM_WEIGHT'
+        The created sum of weights name.
+    user_storage_parms : dictionary
+    user_storage_parms['to_disk'] : bool, default = False
+        If true the dask graph is executed and saved to disk in the zarr format.
+    user_storage_parms['append'] : bool, default = False
+        If storage_parms['to_disk'] is True only the dask graph associated with the function is executed and the resulting data variables are saved to an existing zarr file on disk.
+        Note that graphs on unrelated data to this function will not be executed or saved.
+    user_storage_parms['outfile'] : str
+        The zarr file to create or append to.
+    user_storage_parms['compressor'] : numcodecs.blosc.Blosc,default=Blosc(cname='zstd', clevel=2, shuffle=0)
+    
     Returns
     -------
-    dirty_image_dataset : xarray.core.dataset.Dataset
+    image_dataset : xarray.core.dataset.Dataset
+        The image_dataset will contain the image created and the sum of weights.
     """
     print('######################### Start make_dirty_image #########################')
     import numpy as np

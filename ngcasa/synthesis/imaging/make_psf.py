@@ -24,16 +24,47 @@
 
 def make_psf(vis_dataset, user_grid_parms, user_storage_parms):
     """
+    Creates a cube or continuum point spread function (psf) image from the user specified uvw and imaging weight data. Only the prolate spheroidal convolutional gridding function is supported (this will change in a future releases.)
     
     Parameters
     ----------
     vis_dataset : xarray.core.dataset.Dataset
-        input Visibility Dataset
-    grid_parms : dictionary
-          keys ('chan_mode','imsize','cell','oversampling','support','to_disk','outfile')
+        Input visibility dataset.
+    user_grid_parms : dictionary
+    user_grid_parms['imsize'] : list of int, length = 2
+        The image size (no padding).
+    user_grid_parms['cell']  : list of number, length = 2, units = arcseconds
+        The image cell size.
+    user_grid_parms['chan_mode'] : {'continuum'/'cube'}, default = 'continuum'
+        Create a continuum or cube image.
+    user_grid_parms['oversampling'] : int, default = 100
+        The oversampling used for the convolutional gridding kernel. This will be removed in a later release and incorporated in the function that creates gridding convolutional kernels.
+    user_grid_parms['support'] : int, default = 7
+        The full support used for convolutional gridding kernel. This will be removed in a later release and incormporrated in the function that creates gridding convolutional kernels.
+    user_grid_parms['fft_padding'] : number, acceptable range [1,100], default = 1.2
+        The factor that determines how much the gridded weights are padded before the fft is done.
+    user_grid_parms['uvw_name'] : str, default ='UVW'
+        The name of uvw data variable that will be used to grid the imaging weights.
+    user_grid_parms['imaging_weight_name'] : str, default ='IMAGING_WEIGHT'
+        The name of the imaging weights to be gridded.
+    user_grid_parms['image_name'] : str, default ='PSF'
+        The created image name.
+    user_grid_parms['sum_weight_name'] : str, default ='PSF_SUM_WEIGHT'
+        The created sum of weights name.
+    user_storage_parms : dictionary
+    user_storage_parms['to_disk'] : bool, default = False
+        If true the dask graph is executed and saved to disk in the zarr format.
+    user_storage_parms['append'] : bool, default = False
+        If storage_parms['to_disk'] is True only the dask graph associated with the function is executed and the resulting data variables are saved to an existing zarr file on disk.
+        Note that graphs on unrelated data to this function will not be executed or saved.
+    user_storage_parms['outfile'] : str
+        The zarr file to create or append to.
+    user_storage_parms['compressor'] : numcodecs.blosc.Blosc,default=Blosc(cname='zstd', clevel=2, shuffle=0)
+    
     Returns
     -------
-    psf_dataset : xarray.core.dataset.Dataset
+    image_dataset : xarray.core.dataset.Dataset
+        The image_dataset will contain the image created and the sum of weights.
     """
     
     print('######################### Start make_psf #########################')
@@ -115,14 +146,12 @@ def make_psf(vis_dataset, user_grid_parms, user_storage_parms):
             
             list_arrays = [image_dataset[storage_parms['list_data_variable_name'][0]].data, image_dataset[storage_parms['list_data_variable_name'][1]].data]
             storage_parms['list_array_dimensions'] = [['d0', 'd1', 'chan', 'pol'],['chan', 'pol']]
-            #try:
-            if True:
-                #image_dataset = _add_data_variables_to_dataset(image_dataset,list_arrays,storage_parms)
+            try:
                 image_dataset = append_zarr(image_dataset, storage_parms['outfile'],list_arrays,storage_parms['list_data_variable_name'],storage_parms['list_array_dimensions'],graph_name=storage_parms['graph_name'])
                 print('##################### Finished appending psf #####################')
                 return image_dataset
-            #except Exception:
-            #    print('ERROR : Could not append ', storage_parms['list_data_variable_name'], 'to', storage_parms['outfile'])
+            except Exception:
+                print('ERROR : Could not append ', storage_parms['list_data_variable_name'], 'to', storage_parms['outfile'])
         else:
             print('Saving dataset to ', storage_parms['outfile'])
             #image_dataset = _to_storage(image_dataset, storage_parms)
