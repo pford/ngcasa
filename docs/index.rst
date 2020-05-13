@@ -16,7 +16,9 @@ scalable Python-based solution.
    calibration
    flagging
    imaging
+   continuum_imaging_example
    simulation
    api
    verification
    about
+   
