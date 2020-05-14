@@ -17,6 +17,7 @@ scalable Python-based solution.
    flagging
    imaging
    continuum_imaging_example
+   cube_imaging_example
    simulation
    api
    verification
