@@ -95,7 +95,7 @@ def make_psf(vis_dataset, user_grid_parms, user_storage_parms):
     grid_parms['do_psf'] = True
     
     assert(_check_grid_params(vis_dataset,grid_parms,default_image_name='PSF',default_sum_weight_name='PSF_SUM_WEIGHT')), "######### ERROR: user_grid_parms checking failed"
-    assert(_check_storage_parms(storage_parms,'psf.img.zarr')), "######### ERROR: user_storage_parms checking failed"
+    assert(_check_storage_parms(storage_parms,'psf.img.zarr','make_psf')), "######### ERROR: user_storage_parms checking failed"
     
     # Creating gridding kernel
     cgk, correcting_cgk_image = _create_prolate_spheroidal_kernel(grid_parms['oversampling'], grid_parms['support'], grid_parms['imsize_padded'])
@@ -138,24 +138,29 @@ def make_psf(vis_dataset, user_grid_parms, user_storage_parms):
     
     ### Storing psf image code
     if  storage_parms['to_disk']:
-        storage_parms['graph_name'] = 'make_psf'
-        
+        #Must be a beter way to convert a sortedDict to dict
+        if storage_parms['chunks_return'] is {}:
+            chunks_return = {}
+            for dim_key in image_dataset.chunks:
+                chunks_return[dim_key] = image_dataset.chunks[dim_key][0]
+            storage_parms['chunks_return'] = chunks_return
+    
         if storage_parms['append']:
-            storage_parms['list_data_variable_name'] = [grid_parms['image_name'], grid_parms['sum_weight_name']]
-            print('Atempting to add ', storage_parms['list_data_variable_name']   , ' to ', storage_parms['outfile'])
+            print('Atempting to add ', [grid_parms['image_name'], grid_parms['sum_weight_name']] , ' to ', storage_parms['outfile'])
             
-            list_arrays = [image_dataset[storage_parms['list_data_variable_name'][0]].data, image_dataset[storage_parms['list_data_variable_name'][1]].data]
-            storage_parms['list_array_dimensions'] = [['d0', 'd1', 'chan', 'pol'],['chan', 'pol']]
             try:
-                image_dataset = append_zarr(image_dataset, storage_parms['outfile'],list_arrays,storage_parms['list_data_variable_name'],storage_parms['list_array_dimensions'],graph_name=storage_parms['graph_name'])
+                list_xarray_data_variables = [image_dataset[grid_parms['image_name']],image_dataset[grid_parms['sum_weight_name']]]
+                
+                image_dataset = append_zarr(list_xarray_data_variables,outfile=storage_parms['outfile'],chunks_return=storage_parms['chunks_return'],graph_name=storage_parms['graph_name'])
                 print('##################### Finished appending psf #####################')
                 return image_dataset
             except Exception:
                 print('ERROR : Could not append ', storage_parms['list_data_variable_name'], 'to', storage_parms['outfile'])
         else:
             print('Saving dataset to ', storage_parms['outfile'])
-            #image_dataset = _to_storage(image_dataset, storage_parms)
-            write_zarr(image_dataset, outfile=storage_parms['outfile'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
+            
+            image_dataset = write_zarr(image_dataset, outfile=storage_parms['outfile'], chunks_return=storage_parms['chunks_return'], chunks_on_disk=storage_parms['chunks_on_disk'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
+            
             print('##################### Created new dataset with make_psf #####################')
             return image_dataset
     

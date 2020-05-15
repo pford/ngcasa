@@ -82,7 +82,7 @@ def make_imaging_weights(vis_dataset, user_imaging_weights_parms,user_storage_pa
     storage_parms =  copy.deepcopy(user_storage_parms)
     
     assert(_check_imaging_weights_parms(vis_dataset,imaging_weights_parms)), "######### ERROR: user_imaging_weights_parms checking failed"
-    assert(_check_storage_parms(storage_parms,'dataset.vis.zarr')), "######### ERROR: user_storage_parms checking failed"
+    assert(_check_storage_parms(storage_parms,'dataset.vis.zarr','make_imaging_weights')), "######### ERROR: user_storage_parms checking failed"
     
     
     #Check if weight or weight spectrum present
@@ -116,21 +116,33 @@ def make_imaging_weights(vis_dataset, user_imaging_weights_parms,user_storage_pa
         
     ### Storing imaging weight code
     if  storage_parms['to_disk']:
-        storage_parms['graph_name'] = 'make_imaging_weights'
-        storage_parms['data_variable_name'] = imaging_weights_parms['imaging_weight_name']
+        #Must be a beter way to convert a sortedDict to dict
+        if storage_parms['chunks_return'] is {}:
+            chunks_return = {}
+            for dim_key in image_dataset.chunks:
+                chunks_return[dim_key] = image_dataset.chunks[dim_key][0]
+            storage_parms['chunks_return'] = chunks_return
         
         if storage_parms['append']:
-            print('Atempting to add ', storage_parms['data_variable_name']  , ' to ', storage_parms['outfile'])
-            imaging_weight = vis_dataset[storage_parms['data_variable_name']].data
+            print('Atempting to add ', imaging_weights_parms['imaging_weight_name'] , ' to ', storage_parms['outfile'])
+            
             try:
-                vis_dataset = append_zarr(vis_dataset, storage_parms['outfile'],[imaging_weight],[storage_parms['data_variable_name']],[['time', 'baseline', 'chan', 'pol']],graph_name=storage_parms['graph_name'])
+                #vis_dataset = append_zarr(vis_dataset, storage_parms['outfile'],[imaging_weight],[storage_parms['data_variable_name']],[['time', 'baseline', 'chan', 'pol']],graph_name=storage_parms['graph_name'])
+                
+                list_xarray_data_variables = [vis_dataset[imaging_weights_parms['data_variable_name']]]
+                
+                image_dataset = append_zarr(list_xarray_data_variables,outfile=storage_parms['outfile'],chunks_return=storage_parms['chunks_return'],graph_name=storage_parms['graph_name'])
+                
                 print('##################### Finished appending imaging_weights #####################')
                 return vis_dataset
             except Exception:
-                print('ERROR : Could not append ', storage_parms['data_variable_name'], 'to', storage_parms['outfile'])
+                print('ERROR : Could not append ', imaging_weights_parms['imaging_weight_name'] , 'to', storage_parms['outfile'])
         else:
             print('Saving dataset to ', storage_parms['outfile'])
-            write_zarr(vis_dataset, outfile=storage_parms['outfile'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
+            
+            vis_dataset = write_zarr(vis_dataset, outfile=storage_parms['outfile'], chunks_return=storage_parms['chunks_return'], chunks_on_disk=storage_parms['chunks_on_disk'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
+            
+            #vis_dataset = write_zarr(vis_dataset, outfile=storage_parms['outfile'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
             print('##################### Created new dataset with imaging_weights #####################')
             return vis_dataset
             

@@ -100,7 +100,7 @@ def _check_dataset(vis_dataset,data_variable_name):
     return True
     
     
-def _check_storage_parms(storage_parms,default_outfile):
+def _check_storage_parms(storage_parms,default_outfile,graph_name):
     from numcodecs import Blosc
     parms_passed = True
     
@@ -110,7 +110,9 @@ def _check_storage_parms(storage_parms,default_outfile):
         if not(_check_parms(storage_parms, 'outfile', [str],default=default_outfile)): parms_passed = False
         if not(_check_parms(storage_parms, 'append', [bool],default=False)): parms_passed = False
         if not(_check_parms(storage_parms, 'compressor', [Blosc],default=Blosc(cname='zstd', clevel=2, shuffle=0))): parms_passed = False
-    
+        if not(_check_parms(storage_parms, 'chunks_on_disk', [dict],default={})): parms_passed = False
+        if not(_check_parms(storage_parms, 'chunks_return', [dict],default={})): parms_passed = False
+        if not(_check_parms(storage_parms, 'graph_name', [str],default=graph_name)): parms_passed = False
     return parms_passed
 
 

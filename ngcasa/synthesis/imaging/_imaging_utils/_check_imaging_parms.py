@@ -84,12 +84,11 @@ def _check_imaging_weights_parms(vis_dataset, imaging_weights_parms):
         if not(_check_parms(imaging_weights_parms, 'briggs_abs_noise', [numbers.Number], default=1.0)): parms_passed = False
 
     if not(_check_parms(imaging_weights_parms, 'robust', [numbers.Number], default=0.5, acceptable_range=[-2,2])): parms_passed = False
-
-    if not(_check_parms(imaging_weights_parms, 'chan_mode', [str], acceptable_data=['cube','continuum'], default='continuum')): parms_passed = False
-
-    if not(_check_parms(imaging_weights_parms, 'imsize', [list], list_acceptable_data_types=[int,np.int64], list_len=2)): parms_passed = False
-
-    if not(_check_parms(imaging_weights_parms, 'cell', [list], list_acceptable_data_types=[numbers.Number], list_len=2)): parms_passed = False
+    
+    if imaging_weights_parms['weighting'] != 'natural':
+        if not(_check_parms(imaging_weights_parms, 'chan_mode', [str], acceptable_data=['cube','continuum'], default='continuum')): parms_passed = False
+        if not(_check_parms(imaging_weights_parms, 'imsize', [list], list_acceptable_data_types=[int,np.int64], list_len=2)): parms_passed = False
+        if not(_check_parms(imaging_weights_parms, 'cell', [list], list_acceptable_data_types=[numbers.Number], list_len=2)): parms_passed = False
 
     if parms_passed == True:
         imaging_weights_parms['imsize'] = np.array(imaging_weights_parms['imsize']).astype(int)
