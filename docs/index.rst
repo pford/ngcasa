@@ -13,6 +13,7 @@ scalable Python-based solution.
    :maxdepth: 3
 
    readme
+   ngCASA_Application_Examples
    calibration
    flagging
    imaging

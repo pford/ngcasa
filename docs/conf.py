@@ -50,7 +50,7 @@ extensions = [
     'sphinx_automodapi.automodapi',
     'm2r'
 ]
-
+nbsphinx_allow_errors = True
 todo_include_todos = True
 add_module_names = False
 numpy_show_class_members = False
