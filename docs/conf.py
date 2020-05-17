@@ -52,6 +52,7 @@ extensions = [
     'm2r'
 ]
 nbsphinx_allow_errors = True
+nbsphinx_execute = 'never'
 todo_include_todos = True
 add_module_names = False
 numpy_show_class_members = False
