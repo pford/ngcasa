@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,13 +14,17 @@
 
 def auto_clip(vis_dataset,auto_clip_parms, storage_parms):
     """
+    .. todo::
+        This function is not yet implemented
+        
     An autoflag algorithm that clips the result of a specified expression.
 
     Inputs :
-        (1) algo parameters
-        (2) array name for output flags. Default = FLAG
-        (3) array name for input flags. Default = FLAG
-
+    
+    (1) algo parameters
+    (2) array name for output flags. Default = FLAG
+    (3) array name for input flags. Default = FLAG
+    
     If a new flag_array is picked for the output, save only 'new' flags.
     They can be merged with pre-existing flags in a separate step
     

@@ -9,5 +9,5 @@ from .auto_rflag import auto_rflag
 from .auto_tfcrop import auto_tfcrop
 from .auto_uvbin import auto_uvbin
 from .extend import extend
-from .summary import summary
+from .flag_summary import flag_summary
 from .manage_flags import manage_flags

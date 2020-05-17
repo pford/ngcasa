@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,15 +14,21 @@
 
 def quack(vis_dataset,quack_parms, storage_parms):
     """
-    TBD : Change name ?!!
+    .. todo::
+        This function is not yet implemented
     
     Flag the beginning and/or end of scans to account for observation effects
     such as antenna slewing delays.
     
     Inputs :
-        (1) time-width, beginning or end or both
-        (2) array name for output flags. Default = FLAG
-        
+    
+    (1) time-width, beginning or end or both
+    (2) array name for output flags. Default = FLAG
+    
+    TBD:
+    
+    Change name ?
+    
     Returns
     -------
     vis_dataset : xarray.core.dataset.Dataset

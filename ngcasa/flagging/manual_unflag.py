@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,11 +14,15 @@
 
 def manual_unflag(vis_dataset, flag_parms, storage_parms):
     """
+    .. todo::
+        This function is not yet implemented
+    
     Define a set of data selection queries to mark as flags.
     
     Inputs :
-        (1) list of selection queries
-        (2) array name for output flags. Default = FLAG
+    
+    (1) list of selection queries
+    (2) array name for output flags. Default = FLAG
         
     Returns
     -------

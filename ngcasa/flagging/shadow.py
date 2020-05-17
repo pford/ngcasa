@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
 
 def shadow(vis_dataset, shadow_parms, storage_parms):
     """
+    .. todo::
+        This function is not yet implemented
+    
     Flag all baselines for antennas that are shadowed beyond the specified tolerance.
     
     All antennas in the zarr-file metadata (and their corresponding diameters)
@@ -28,8 +31,9 @@ def shadow(vis_dataset, shadow_parms, storage_parms):
     to the meta-data list in the zarr prior to calling this method.
     
     Inputs :
-        (1) shadowlimit or tolerance (in m)
-        (2) array name for output flags. Default = FLAG
+    
+    (1) shadowlimit or tolerance (in m)
+    (2) array name for output flags. Default = FLAG
         
     Returns
     -------
