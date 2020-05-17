@@ -12,4 +12,5 @@ description will be populated.
    _api/flagging
    _api/synthesis
    _api/simulator
+   _api/imaging
 

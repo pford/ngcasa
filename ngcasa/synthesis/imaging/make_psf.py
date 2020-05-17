@@ -12,16 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#Allow setting of padding grid_parms['gridder_padding'] = gridder_padding
-#Setting to keep grid or correcting
-#normalizarion parameters (flat sky, flat noise etc)
-#mosaic parameters, etc
-#Allow users to append image to existing img.zarr
-#storage_parms['append'], user_grid_parms['data_variable_name']
-
-#Units not specified, for example  arcsecond, Jy ect
-
-
 def make_psf(vis_dataset, user_grid_parms, user_storage_parms):
     """
     Creates a cube or continuum point spread function (psf) image from the user specified uvw and imaging weight data. Only the prolate spheroidal convolutional gridding function is supported (this will change in a future releases.)
