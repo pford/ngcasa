@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
 
 def predict_modelvis_image(img_dataset, vis_dataset, grid_parms, storage_parms):
     """
-    Predict model visibilities from an input model image cube (units Jy/pixel) using
-    a pre-specified gridding convolution function cache.
+    .. todo::
+        This function is not yet implemented
+        
+    Predict model visibilities from an input model image cube (units Jy/pixel) using a pre-specified gridding convolution function cache.
+    
     Save the model visibilities in arr_name (default = 'MODEL')
+    
     Optionally overwrite the model or add to existing model (incremental=T)
     
     (A input cube with 1 channel is a continuum image (nterms=1))

@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,8 +14,13 @@
 
 def make_pb(vis_dataset,cf_dataset, make_pb_parms,  storage_parms):
     """
+    .. todo::
+        This function is not yet implemented
+        
     Construct a Primary Beam cube containing a weighted sum of primary beams
+    
     Option 1 : Evaluate models directly onto the image (for common PBs)
+    
     Option 2 : Inverse FT each gridding convolution function (for varying PBs)
 
     (A cube with 1 channel is a continuum image (nterms=1))

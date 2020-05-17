@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,7 +14,13 @@
 
 def make_image(vis_dataset, grid_parms, storage_parms):
     """
-    Creates a cube or continuum dirty image from the user specified visibility, uvw and imaging weight data. Only the prolate spheroidal convolutional gridding function is supported. This will change in a future release and the input parameter cf_dataset will be added. The user_grid_parms 'oversampling' and 'support' will then be removed.
+    .. todo::
+        This function is not yet implemented
+    
+    Creates a cube or continuum dirty image from the user specified visibility, uvw and imaging weight data.
+    
+    Only the prolate spheroidal convolutional gridding function is supported. This will change in a future release
+    and the input parameter cf_dataset will be added. The user_grid_parms 'oversampling' and 'support' will then be removed.
     
     Parameters
     ----------

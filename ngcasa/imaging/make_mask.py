@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
 
 def make_mask(img_dataset,mask_parms,storage_parms):
     """
+    .. todo::
+        This function is not yet implemented
+    
     Make a region to identify a mask for use in deconvolution.
     
     One or more of the following options are allowed
+    
     - Supply a mask in the form of a cngi.image.region
     - Run an auto-masking algorithm to detect structure and define a cngi.image.region
     - Apply a pblimit based mask

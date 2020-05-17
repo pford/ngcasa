@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -15,11 +15,19 @@
 
 def make_imaging_weight(vis_dataset, imaging_weights_parms, storage_parms):
     """
+    .. todo::
+        This function is not yet implemented
+        
     Creates the imaging weight data variable that has dimensions time x baseline x chan x pol (matches the visibility data variable).
     The weight density can be averaged over channels or calculated independently for each channel using imaging_weights_parms['chan_mode'].
     The following imaging weighting schemes are supported 'natural', 'uniform', 'briggs', 'briggs_abs'.
-    The imaging_weights_parms['imsize'] and imaging_weights_parms['cell'] should usually be the same values that will be used for subsequent synthesis blocks (for example making the psf).
-    To achieve something similar to 'superuniform' weighting in CASA tclean imaging_weights_parms['imsize'] and imaging_weights_parms['cell'] can be varied relative to the values used in subsequent synthesis blocks.
+    
+    The imaging_weights_parms['imsize'] and imaging_weights_parms['cell'] should usually be the same values that will be used for
+    subsequent synthesis blocks (for example making the psf).
+    
+    To achieve something similar to 'superuniform' weighting in CASA tclean imaging_weights_parms['imsize'] and
+    imaging_weights_parms['cell'] can be varied relative to the values used in subsequent synthesis blocks.
+    
     Support for radial weighting and uvtapering will be added in a future release.
     
     Parameters

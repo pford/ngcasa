@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
 
 def make_sd_image(vis_dataset,sd_parms,storage_parms):
     """
+    .. todo::
+        This function is not yet implemented
+        
     Construct an observed single dish image cube from single-dish data
     
     Returns

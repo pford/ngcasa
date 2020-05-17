@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,8 +14,13 @@
 
 def make_psf(vis_dataset, grid_parms, storage_parms):
     """
+    .. todo::
+        This function is not yet implemented
+        
     Creates a cube or continuum point spread function (psf) image from the user specified uvw and imaging weight data.
-    Only the prolate spheroidal convolutional gridding function is currently supported. This will change in a future release and the input parameter cf_dataset will be added. The user_grid_parms 'oversampling' and 'support' will then be removed.
+    
+    Only the prolate spheroidal convolutional gridding function is currently supported. This will change in a future release and
+    the input parameter cf_dataset will be added. The user_grid_parms 'oversampling' and 'support' will then be removed.
     
     Parameters
     ----------

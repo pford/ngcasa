@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
 
 def linear_mosaic(img_dataset, img_mosaic):
     """
+    .. todo::
+        This function is not yet implemented
+    
     Construct a linear mosaic as a primary-beam weighted sum of a set of input images.
     Individual images are re-sampled onto a larger image grid and summed.
        
@@ -21,8 +24,11 @@ def linear_mosaic(img_dataset, img_mosaic):
     
     Output image :  sum( input_images ) / sum ( input_pbs )
     
-    TBD : This requires some sort of merging of img_datasets.
-          ? CNGI demo on how to append/add images to an image_set and ensure that meta-data are consistent ?
+    TBD :
+    
+    This requires some sort of merging of img_datasets.  CNGI demo on how to append/add images to an image_set and ensure
+    that meta-data are consistent?
+    
     Returns
     -------
     img_dataset : xarray.core.dataset.Dataset

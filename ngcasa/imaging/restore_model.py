@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -15,16 +15,21 @@
 
 def restore_model(img_dataset, restore_parms):
     """
+    .. todo::
+        This function is not yet implemented
+        
     Restore a deconvolved model.
     
-    Inputs : target resolution could be native or 'common' or explicitly specified.
+    Inputs - target resolution could be native or 'common' or explicitly specified.
     
     Cube and single-term imaging :
+    
     - Smooth the model image (Jy/pixel) to the target resolution
     - Smooth the residual image (Jy/beam) to the target resolution
     - Add the two smoothed images
     
     Multi-term imaging :
+    
     - Smooth the model taylor coefficient images to the target resolution
     - Apply the inverse Hessian to the residual image vector (data-space to model-space)
       (At non-native target resolution, also compute a new Hessian matched to the scale of the restoring beam.)

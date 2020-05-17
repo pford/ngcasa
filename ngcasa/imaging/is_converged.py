@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
 
 def is_converged(img_dataset, iterpars, storage_parms):
     """
+    .. todo::
+        This function is not yet implemented
+    
     An iteration controller for image reconstruction
     
     The current image set (residual, psf, model, etc) is evaluated against stopping criteria derived

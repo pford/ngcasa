@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,7 +14,9 @@
 
 def make_grid(vis_dataset, user_grid_parms, storage_parms):
     """
-
+    .. todo::
+        This function is not yet implemented
+    
     Returns
     -------
     img_xds : xarray.core.dataset.Dataset

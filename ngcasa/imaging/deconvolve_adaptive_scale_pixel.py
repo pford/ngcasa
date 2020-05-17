@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,15 +14,18 @@
     
 def deconvolve_adaptive_scale_pixel(img_dataset, deconvolve_parms, storage_parms):
     """
+    .. todo::
+        This function is not yet implemented
+    
     An iterative solver to construct a 2D mixed model from an observed image(set) and psf(set).
     
-    Sky Model : A linear combination of 2D Gaussians
-    Algorithm : Chi-square / TV minimization on atom parameters, with subspace selections.
+    Sky Model - A linear combination of 2D Gaussians
+    Algorithm - Chi-square / TV minimization on atom parameters, with subspace selections.
        
-    Options : Narrow-band, Wide-band
+    Options - Narrow-band, Wide-band
     
-    Input : Requires an input cube (mfs is a cube with nchan=1)
-    Output : Cube model image  and/or a list of flux components.
+    Input - Requires an input cube (mfs is a cube with nchan=1)
+    Output - Cube model image  and/or a list of flux components.
 
     Returns
     -------

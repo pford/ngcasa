@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,6 +13,9 @@
 #   limitations under the License.
 def feather(img_dataset_lowres, img_dataset_highres):
     """
+    .. todo::
+        This function is not yet implemented
+    
     Feather two images together, based on restoring beam information stored in both.
     
     Output image = iFT( FT(lowres_image) + [1-FT(lowres_beam)] x FT(highres_image) )

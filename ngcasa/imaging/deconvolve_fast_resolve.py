@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,13 +13,16 @@
 #   limitations under the License.
 def deconvolve_fast_resolve(img_dataset, deconvolve_parms, storage_parms):
     """
+    .. todo::
+        This function is not yet implemented
+    
     An iterative solver to construct a Bayesian model from an observed image(set) and psf(set).
     
-    Sky Model : Pixel amplitudes
-    Algorithm : Bayesian formulation that includes constraints on the flux distribution and wideband support.
+    Sky Model - Pixel amplitudes
+    Algorithm - Bayesian formulation that includes constraints on the flux distribution and wideband support.
         
-    Input : Requires an input cube (mfs is a cube with nchan=1)
-    Output : Cube model image, Error map (Spectral index map)
+    Input - Requires an input cube (mfs is a cube with nchan=1)
+    Output - Cube model image, Error map (Spectral index map)
 
     Returns
     -------
