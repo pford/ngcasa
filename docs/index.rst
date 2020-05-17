@@ -13,14 +13,13 @@ scalable Python-based solution.
    :maxdepth: 3
 
    readme
-   Overview
-   calibration
-   flagging
-   imaging
-   continuum_imaging_example
-   cube_imaging_example
-   simulation
+   ngcasa_calibration
+   ngcasa_flagging
+   ngcasa_imaging
+   ngcasa_simulation
+   prototypes
    api
    verification
+   ngcasa_development
    about
    

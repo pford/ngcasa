@@ -7,7 +7,3 @@ Verification tests ensure that code matches its documentation, expected output a
    :maxdepth: 1
 
    verification/mapping
-   verification/functional
-   verification/stakeholder
-   verification/performance
-   verification/regression

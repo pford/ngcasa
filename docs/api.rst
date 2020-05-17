@@ -10,7 +10,9 @@ description will be populated.
 
    _api/calibration
    _api/flagging
-   _api/synthesis
-   _api/simulator
    _api/imaging
-
+   _api/simulator
+   _api/cngi.conversion
+   _api/cngi.dio
+   _api/cngi.vis
+   _api/cngi.image

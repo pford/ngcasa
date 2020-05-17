@@ -1,4 +1,4 @@
-Calibration
+ngcasa.calibration
 ====================
 
 .. automodsumm:: ngcasa.calibration

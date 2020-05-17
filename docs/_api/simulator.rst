@@ -1,4 +1,4 @@
-Simulator
+ngcasa.simulator
 ====================
 
 .. automodsumm:: ngcasa.simulator

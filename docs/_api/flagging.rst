@@ -1,4 +1,4 @@
-Flagging
+ngcasa.flagging
 ===================
 
 .. automodsumm:: ngcasa.flagging

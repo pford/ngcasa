@@ -1,4 +1,4 @@
-Imaging
+ngcasa.imaging
 ====================
 
 .. automodsumm:: ngcasa.imaging
