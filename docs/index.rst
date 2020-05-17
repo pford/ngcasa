@@ -14,7 +14,6 @@ scalable Python-based solution.
 
    readme
    Overview
-   ngCASA_Application_Examples
    calibration
    flagging
    imaging
