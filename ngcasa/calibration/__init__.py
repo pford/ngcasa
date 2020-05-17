@@ -1,3 +1,3 @@
 #__init__.py
-from .solve import solve
-from .apply import apply
+from .calsolve import calsolve
+from .calapply import calapply

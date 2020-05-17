@@ -12,7 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-def solve(vis_dataset, cal_dataset, solve_parms, storage_parm):
+
+def calsolve(vis_dataset, cal_dataset, solve_parms, storage_parm):
     """
     Calculate antenna gain solutions according to the parameters in solpars.
     The input dataset has been pre-averaged/processed and the model visibilities exist

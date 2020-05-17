@@ -1,4 +1,4 @@
-#   Copyright 2019 AUI, Inc. Washington DC, USA
+#   Copyright 2020 AUI, Inc. Washington DC, USA
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-def apply(vis_dataset, cal_dataset, apply_parms, storage_parms):
+def calapply(vis_dataset, cal_dataset, apply_parms, storage_parms):
     """
     Apply antenna gain solutions according to the parameters in solpars.
     
     Calculate  V_ij(corrected) = V_ij(observed) / g_i g_j*
     
-   
+    
     Inputs :
         List of calibration solution datasets (to apply in the specified order)
         Interpolation type ?
