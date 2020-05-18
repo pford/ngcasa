@@ -18,6 +18,7 @@ scalable Python-based solution.
    ngcasa_imaging
    ngcasa_simulation
    prototypes
+   benchmark
    api
    verification
    ngcasa_development
