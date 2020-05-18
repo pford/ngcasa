@@ -11,6 +11,7 @@ description will be populated.
    _api/calibration
    _api/flagging
    _api/imaging
+   _api/deconvolution
    _api/simulator
    _api/cngi.conversion
    _api/cngi.dio
