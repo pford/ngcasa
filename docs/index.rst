@@ -2,7 +2,7 @@ Next Generation CASA
 ===================================
 
 A project to replace the current CASA code base with a parallel,
-scalable Python-based solution.
+scalable Python-based solution. To get started go to the development page (https://ngcasa.readthedocs.io/en/latest/ngcasa_development.html).
 
 .. image:: casa_logo.png
    :width: 250px
