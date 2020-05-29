@@ -12,13 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#ducting - code is complex and might fail after some time if parameters is wrong (time waisting). Sensable values are also checked. Gives printout of all wrong parameters. Dirty images alone has x parametrs.
-
-
-#Should this be moved to cngi?
-import numpy as np
-
-
 def _check_parms(parm_dict, string_key, acceptable_data_types, acceptable_data = None, acceptable_range = None, list_acceptable_data_types=None, list_len=None, default=None):
     """
 
@@ -38,6 +31,8 @@ def _check_parms(parm_dict, string_key, acceptable_data_types, acceptable_data =
     parm_passed : bool
         
     """
+    
+    import numpy as np
 
     if string_key in parm_dict:
         if (list in acceptable_data_types) or (np.array in acceptable_data_types):

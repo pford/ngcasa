@@ -72,7 +72,7 @@ def make_psf(vis_dataset, user_grid_parms, user_storage_parms):
     from numcodecs import Blosc
     from itertools import cycle
     
-    from cngi.dio import write_zarr, append_zarr
+    from ngcasa._ngcasa_utils._store import _store
     from ngcasa._ngcasa_utils._check_parms import _check_storage_parms
     from ._imaging_utils._check_imaging_parms import _check_grid_params, _check_storage_parms
     from ._imaging_utils._gridding_convolutional_kernels import _create_prolate_spheroidal_kernel, _create_prolate_spheroidal_kernel_1D
@@ -125,35 +125,5 @@ def make_psf(vis_dataset, user_grid_parms, user_storage_parms):
     image_dict[grid_parms['image_name']] = xr.DataArray(corrected_psf_image, dims=['d0', 'd1', 'chan', 'pol'])
     image_dataset = xr.Dataset(image_dict, coords=coords)
     
-    
-    ### Storing psf image code
-    if  storage_parms['to_disk']:
-        #Must be a beter way to convert a sortedDict to dict
-        if storage_parms['chunks_return'] is {}:
-            chunks_return = {}
-            for dim_key in image_dataset.chunks:
-                chunks_return[dim_key] = image_dataset.chunks[dim_key][0]
-            storage_parms['chunks_return'] = chunks_return
-    
-        if storage_parms['append']:
-            print('Atempting to add ', [grid_parms['image_name'], grid_parms['sum_weight_name']] , ' to ', storage_parms['outfile'])
-            
-            try:
-                list_xarray_data_variables = [image_dataset[grid_parms['image_name']],image_dataset[grid_parms['sum_weight_name']]]
-                
-                image_dataset = append_zarr(list_xarray_data_variables,outfile=storage_parms['outfile'],chunks_return=storage_parms['chunks_return'],graph_name=storage_parms['graph_name'])
-                print('##################### Finished appending psf #####################')
-                return image_dataset
-            except Exception:
-                print('ERROR : Could not append ', storage_parms['list_data_variable_name'], 'to', storage_parms['outfile'])
-        else:
-            print('Saving dataset to ', storage_parms['outfile'])
-            
-            image_dataset = write_zarr(image_dataset, outfile=storage_parms['outfile'], chunks_return=storage_parms['chunks_return'], chunks_on_disk=storage_parms['chunks_on_disk'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
-            
-            print('##################### Created new dataset with make_psf #####################')
-            return image_dataset
-    
-    print('##################### created graph for make_psf #####################')
-    return image_dataset
-
+    list_xarray_data_variables = [image_dataset[grid_parms['image_name']],image_dataset[grid_parms['sum_weight_name']]]
+    return _store(image_dataset,list_xarray_data_variables,storage_parms)

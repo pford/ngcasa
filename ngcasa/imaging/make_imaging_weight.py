@@ -74,6 +74,7 @@ def make_imaging_weight(vis_dataset, user_imaging_weights_parms,user_storage_par
     from itertools import cycle
     import zarr
     
+    from ngcasa._ngcasa_utils._store import _store
     from ngcasa._ngcasa_utils._check_parms import _check_storage_parms
     from ._imaging_utils._check_imaging_parms import _check_imaging_weights_parms, _check_storage_parms
     from cngi.dio import write_zarr, append_zarr
@@ -113,42 +114,10 @@ def make_imaging_weight(vis_dataset, user_imaging_weights_parms,user_storage_par
     
     if imaging_weights_parms['weighting'] != 'natural':
         calc_briggs_weights(vis_dataset,imaging_weights_parms,storage_parms)
-        
-    ### Storing imaging weight code
-    if  storage_parms['to_disk']:
-        #Must be a beter way to convert a sortedDict to dict
-        if storage_parms['chunks_return'] is {}:
-            chunks_return = {}
-            for dim_key in image_dataset.chunks:
-                chunks_return[dim_key] = image_dataset.chunks[dim_key][0]
-            storage_parms['chunks_return'] = chunks_return
-        
-        if storage_parms['append']:
-            print('Atempting to add ', imaging_weights_parms['imaging_weight_name'] , ' to ', storage_parms['outfile'])
-            
-            try:
-                #vis_dataset = append_zarr(vis_dataset, storage_parms['outfile'],[imaging_weight],[storage_parms['data_variable_name']],[['time', 'baseline', 'chan', 'pol']],graph_name=storage_parms['graph_name'])
-                
-                list_xarray_data_variables = [vis_dataset[imaging_weights_parms['data_variable_name']]]
-                
-                image_dataset = append_zarr(list_xarray_data_variables,outfile=storage_parms['outfile'],chunks_return=storage_parms['chunks_return'],graph_name=storage_parms['graph_name'])
-                
-                print('##################### Finished appending imaging_weights #####################')
-                return vis_dataset
-            except Exception:
-                print('ERROR : Could not append ', imaging_weights_parms['imaging_weight_name'] , 'to', storage_parms['outfile'])
-        else:
-            print('Saving dataset to ', storage_parms['outfile'])
-            
-            vis_dataset = write_zarr(vis_dataset, outfile=storage_parms['outfile'], chunks_return=storage_parms['chunks_return'], chunks_on_disk=storage_parms['chunks_on_disk'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
-            
-            #vis_dataset = write_zarr(vis_dataset, outfile=storage_parms['outfile'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
-            print('##################### Created new dataset with imaging_weights #####################')
-            return vis_dataset
-            
-    print('##################### Created graph for make_imaging_weights #####################')
-    return vis_dataset
-            
+    
+    list_xarray_data_variables = [vis_dataset[imaging_weights_parms['imaging_weight_name']]]
+    return _store(vis_dataset,list_xarray_data_variables,storage_parms)
+    
 def _match_array_shape(array_to_reshape,array_to_match):
     # Reshape in_weight to match dimnetionality of vis_data (vis_dataset[imaging_weights_parms['data_name']])
     # The order is assumed the same (there can be missing). array_to_reshape is a subset of array_to_match

@@ -31,6 +31,7 @@ def mosaic_rotate_uvw(vis_dataset, global_dataset, user_rotation_parms,user_stor
     #based on UVWMachine and FTMachine
     #measures/Measures/UVWMachine.cc
     
+    from ngcasa._ngcasa_utils._store import _store
     from scipy.spatial.transform import Rotation as R
     import numpy as np
     import copy
@@ -93,34 +94,12 @@ def mosaic_rotate_uvw(vis_dataset, global_dataset, user_rotation_parms,user_stor
     
     vis_dataset[rotation_parms['uvw_out_name']] =  xr.DataArray(uvw, dims=vis_dataset[rotation_parms['uvw_in_name']].dims)
     
-    ### Storing mosaic rotation code
-    if  storage_parms['to_disk']:
-        storage_parms['graph_name'] = 'mosaic_rotate_uvw'
-        storage_parms['data_variable_name'] = rotation_parms['uvw_out_name']
-        
-        if storage_parms['append']:
-            print('Atempting to add ', storage_parms['data_variable_name']  , ' to ', storage_parms['outfile'])
-            uvw = vis_dataset[storage_parms['data_variable_name']].data
-            #try:
-            if True:
-                vis_dataset = append_zarr(vis_dataset, storage_parms['outfile'],[uvw],[storage_parms['data_variable_name']],[['time', 'baseline', 'uvw_index']],graph_name=storage_parms['graph_name'])
-                print('##################### Finished appending uvw #####################')
-                return vis_dataset
-            #except Exception:
-            #    print('ERROR : Could not append ', storage_parms['data_variable_name'], 'to', storage_parms['outfile'])
-        else:
-            print('Saving dataset to ', storage_parms['outfile'])
-            #vis_dataset = _to_storage(vis_dataset, storage_parms)
-            write_zarr(vis_dataset, outfile=storage_parms['outfile'], compressor=storage_parms['compressor'], graph_name=storage_parms['graph_name'])
-            print('##################### Created new dataset with mosaic_rotate_uvw #####################')
-            return vis_dataset
-            
-    print('##################### Created graph for mosaic_rotate_uvw #####################')
-    return vis_dataset
-    
+    list_xarray_data_variables = [vis_dataset[imaging_weights_parms['uvw_name']]]
+    return _store(vis_dataset,list_xarray_data_variables,storage_parms)
 
 def _directional_cosine(phase_center_in_radians):
    '''
+   # In https://arxiv.org/pdf/astro-ph/0207413.pdf see equation 160
    phase_center_in_radians (RA,DEC)
    '''
    phase_center_cosine = np.zeros((3,))
