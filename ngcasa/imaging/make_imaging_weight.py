@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 
-def make_imaging_weight(vis_dataset, user_imaging_weights_parms,user_storage_parms):
+def make_imaging_weight(vis_dataset, imaging_weights_parms,storage_parms):
     """
     Creates the imaging weight data variable that has dimensions time x baseline x chan x pol (matches the visibility data variable).
     The weight density can be averaged over channels or calculated independently for each channel using imaging_weights_parms['chan_mode'].
@@ -25,36 +25,43 @@ def make_imaging_weight(vis_dataset, user_imaging_weights_parms,user_storage_par
     ----------
     vis_dataset : xarray.core.dataset.Dataset
         Input visibility dataset.
-    user_imaging_weights_parms : dictionary
-    user_imaging_weights_parms['weighting'] : {'natural', 'uniform', 'briggs', 'briggs_abs'}, default = natural
+    imaging_weights_parms : dictionary
+    imaging_weights_parms['weighting'] : {'natural', 'uniform', 'briggs', 'briggs_abs'}, default = natural
         Weighting scheme used for creating the imaging weights.
-    user_imaging_weights_parms['imsize'] : list of int, length = 2
+    imaging_weights_parms['imsize'] : list of int, length = 2
         The size of the grid for gridding the imaging weights. Used when imaging_weights_parms['weighting'] is not 'natural'.
-    user_imaging_weights_parms['cell']  : list of number, length = 2, units = arcseconds
+    imaging_weights_parms['cell']  : list of number, length = 2, units = arcseconds
         The size of the pixels in the fft of the grid (the image domain pixel size). Used when imaging_weights_parms['weighting'] is not 'natural'.
-    user_imaging_weights_parms['robust'] : number, acceptable range [-2,2], default = 0.5
+    imaging_weights_parms['robust'] : number, acceptable range [-2,2], default = 0.5
         Robustness parameter for Briggs weighting.
         robust = -2.0 maps to uniform weighting.
         robust = +2.0 maps to natural weighting.
-    user_imaging_weights_parms['briggs_abs_noise'] : number, default=1.0
+    imaging_weights_parms['briggs_abs_noise'] : number, default=1.0
         Noise parameter for imaging_weights_parms['weighting']='briggs_abs' mode weighting.
-    user_imaging_weights_parms['chan_mode'] : {'continuum'/'cube'}, default = 'continuum'
+    imaging_weights_parms['chan_mode'] : {'continuum'/'cube'}, default = 'continuum'
         When 'cube' the weights are calculated independently for each channel (perchanweightdensity=True in CASA tclean) and when 'continuum' a common weight density is calculated for all channels.
-    user_imaging_weights_parms['uvw_name'] : str, default ='UVW'
+    imaging_weights_parms['uvw_name'] : str, default ='UVW'
         The name of uvw data variable that will be used to grid the weights. Used when imaging_weights_parms['weighting'] is not 'natural'.
-    user_imaging_weights_parms['data_name'] : str, default = 'DATA'
+    imaging_weights_parms['data_name'] : str, default = 'DATA'
         The name of the visibility data variable whose dimensions will be used to construct the imaging weight data variable.
-    user_imaging_weights_parms['imaging_weight_name'] : str, default ='IMAGING_WEIGHT'
+    imaging_weights_parms['imaging_weight_name'] : str, default ='IMAGING_WEIGHT'
         The name of that will be used for the imaging weight data variable.
-    user_storage_parms : dictionary
-    user_storage_parms['to_disk'] : bool, default = False
+    storage_parms : dictionary
+    storage_parms['to_disk'] : bool, default = False
         If true the dask graph is executed and saved to disk in the zarr format.
-    user_storage_parms['append'] : bool, default = False
+    storage_parms['append'] : bool, default = False
         If storage_parms['to_disk'] is True only the dask graph associated with the function is executed and the resulting data variables are saved to an existing zarr file on disk.
         Note that graphs on unrelated data to this function will not be executed or saved.
-    user_storage_parms['outfile'] : str
+    storage_parms['outfile'] : str
         The zarr file to create or append to.
-    user_storage_parms['compressor'] : numcodecs.blosc.Blosc,default=Blosc(cname='zstd', clevel=2, shuffle=0)
+    storage_parms['chunks_on_disk'] : dict of int, default = {}
+        The chunk size to use when writing to disk. This is ignored if storage_parms['append'] is True. The default will use the chunking of the input dataset.
+    storage_parms['chunks_return'] : dict of int, default = {}
+        The chunk size of the dataset that is returned. The default will use the chunking of the input dataset.
+    storage_parms['graph_name'] : str
+        The time to compute and save the data is stored in the attribute section of the dataset and storage_parms['graph_name'] is used in the label.
+    storage_parms['compressor'] : numcodecs.blosc.Blosc,default=Blosc(cname='zstd', clevel=2, shuffle=0)
+        The compression algorithm to use. Available compression algorithms can be found at https://numcodecs.readthedocs.io/en/stable/blosc.html.
     
     Returns
     -------
@@ -76,14 +83,14 @@ def make_imaging_weight(vis_dataset, user_imaging_weights_parms,user_storage_par
     
     from ngcasa._ngcasa_utils._store import _store
     from ngcasa._ngcasa_utils._check_parms import _check_storage_parms
-    from ._imaging_utils._check_imaging_parms import _check_imaging_weights_parms, _check_storage_parms
+    from ._imaging_utils._check_imaging_parms import _check_imaging_weights_parms
     from cngi.dio import write_zarr, append_zarr
     
-    imaging_weights_parms =  copy.deepcopy(user_imaging_weights_parms)
-    storage_parms =  copy.deepcopy(user_storage_parms)
+    _imaging_weights_parms =  copy.deepcopy(imaging_weights_parms)
+    _storage_parms =  copy.deepcopy(storage_parms)
     
-    assert(_check_imaging_weights_parms(vis_dataset,imaging_weights_parms)), "######### ERROR: user_imaging_weights_parms checking failed"
-    assert(_check_storage_parms(storage_parms,'dataset.vis.zarr','make_imaging_weights')), "######### ERROR: user_storage_parms checking failed"
+    assert(_check_imaging_weights_parms(vis_dataset,_imaging_weights_parms)), "######### ERROR: imaging_weights_parms checking failed"
+    assert(_check_storage_parms(_storage_parms,'dataset.vis.zarr','make_imaging_weights')), "######### ERROR: storage_parms checking failed"
     
     
     #Check if weight or weight spectrum present
@@ -93,30 +100,30 @@ def make_imaging_weight(vis_dataset, user_imaging_weights_parms,user_storage_par
     weight_spectrum_present = 'WEIGHT_SPECTRUM' in vis_dataset.data_vars
     all_dims_dict = vis_dataset.dims
     
-    vis_data_dims = vis_dataset[imaging_weights_parms['data_name']].dims
-    vis_data_chunksize = vis_dataset[imaging_weights_parms['data_name']].data.chunksize
+    vis_data_dims = vis_dataset[_imaging_weights_parms['data_name']].dims
+    vis_data_chunksize = vis_dataset[_imaging_weights_parms['data_name']].data.chunksize
     
     
     if weight_present and weight_spectrum_present:
-        print('Both WEIGHT and WEIGHT_SPECTRUM data variables found, will use WEIGHT_SPECTRUM to calculate', imaging_weights_parms['imaging_weight_name'])
-        imaging_weight = _match_array_shape(vis_dataset.WEIGHT_SPECTRUM,vis_dataset[imaging_weights_parms['data_name']])
+        print('Both WEIGHT and WEIGHT_SPECTRUM data variables found, will use WEIGHT_SPECTRUM to calculate', _imaging_weights_parms['imaging_weight_name'])
+        imaging_weight = _match_array_shape(vis_dataset.WEIGHT_SPECTRUM,vis_dataset[_imaging_weights_parms['data_name']])
     elif weight_present:
-        print('WEIGHT data variable found, will use WEIGHT to calculate ', imaging_weights_parms['imaging_weight_name'])
-        imaging_weight = _match_array_shape(vis_dataset.WEIGHT,vis_dataset[imaging_weights_parms['data_name']])
+        print('WEIGHT data variable found, will use WEIGHT to calculate ', _imaging_weights_parms['imaging_weight_name'])
+        imaging_weight = _match_array_shape(vis_dataset.WEIGHT,vis_dataset[_imaging_weights_parms['data_name']])
     elif weight_spectrum_present:
-        print('WEIGHT_SPECTRUM  data variable found, will use WEIGHT_SPECTRUM to calculate ', imaging_weights_parms['imaging_weight_name'])
-        imaging_weight = _match_array_shape(vis_dataset.WEIGHT_SPECTRUM,vis_dataset[imaging_weights_parms['data_name']])
+        print('WEIGHT_SPECTRUM  data variable found, will use WEIGHT_SPECTRUM to calculate ', _imaging_weights_parms['imaging_weight_name'])
+        imaging_weight = _match_array_shape(vis_dataset.WEIGHT_SPECTRUM,vis_dataset[_imaging_weights_parms['data_name']])
     else:
-        print('No WEIGHT or WEIGHT_SPECTRUM data variable found,  will assume all weights are unity to calculate ', imaging_weights_parms['imaging_weight_name'])
-        imaging_weight = da.ones(vis_dataset[imaging_weights_parms['data_name']].shape,chunks=vis_data_chunksize)
+        print('No WEIGHT or WEIGHT_SPECTRUM data variable found,  will assume all weights are unity to calculate ', _imaging_weights_parms['imaging_weight_name'])
+        imaging_weight = da.ones(vis_dataset[_imaging_weights_parms['data_name']].shape,chunks=vis_data_chunksize)
     
-    vis_dataset[imaging_weights_parms['imaging_weight_name']] =  xr.DataArray(imaging_weight, dims=vis_dataset[imaging_weights_parms['data_name']].dims)
+    vis_dataset[_imaging_weights_parms['imaging_weight_name']] =  xr.DataArray(imaging_weight, dims=vis_dataset[_imaging_weights_parms['data_name']].dims)
     
-    if imaging_weights_parms['weighting'] != 'natural':
-        calc_briggs_weights(vis_dataset,imaging_weights_parms,storage_parms)
+    if _imaging_weights_parms['weighting'] != 'natural':
+        calc_briggs_weights(vis_dataset,_imaging_weights_parms)
     
-    list_xarray_data_variables = [vis_dataset[imaging_weights_parms['imaging_weight_name']]]
-    return _store(vis_dataset,list_xarray_data_variables,storage_parms)
+    list_xarray_data_variables = [vis_dataset[_imaging_weights_parms['imaging_weight_name']]]
+    return _store(vis_dataset,list_xarray_data_variables,_storage_parms)
     
 def _match_array_shape(array_to_reshape,array_to_match):
     # Reshape in_weight to match dimnetionality of vis_data (vis_dataset[imaging_weights_parms['data_name']])
@@ -128,7 +135,6 @@ def _match_array_shape(array_to_reshape,array_to_match):
     
     reshape_dims = np.ones(len(match_array_chunksize),dtype=int)  #Missing dimentions will be added using reshape command
     tile_dims = np.ones(len(match_array_chunksize),dtype=int) #Tiling is used so that number of elements in each dimention match
-    
     
     array_to_match_dims = array_to_match.dims
     array_to_reshape_dims = array_to_reshape.dims
@@ -143,7 +149,7 @@ def _match_array_shape(array_to_reshape,array_to_match):
 
 
 
-def calc_briggs_weights(vis_dataset,imaging_weights_parms,storage_parms):
+def calc_briggs_weights(vis_dataset,imaging_weights_parms):
     import dask.array as da
     import xarray as xr
     import numpy as np
@@ -169,6 +175,7 @@ def calc_briggs_weights(vis_dataset,imaging_weights_parms,storage_parms):
     cgk_1D = np.ones((1))
     grid_of_imaging_weights, sum_weight = _graph_standard_grid(vis_dataset, cgk_1D, grid_parms)
     
+    
     #############Calculate Briggs parameters#############
     def calculate_briggs_parms(grid_of_imaging_weights, sum_weight, imaging_weights_parms):
         if imaging_weights_parms['weighting'] == 'briggs':
@@ -187,6 +194,7 @@ def calc_briggs_weights(vis_dataset,imaging_weights_parms,storage_parms):
             
         return briggs_factors
     
+    #Map blocks can be simplified by using new_axis and swapping grid_of_imaging_weights and sum_weight
     briggs_factors = da.map_blocks(calculate_briggs_parms,grid_of_imaging_weights,sum_weight, imaging_weights_parms,chunks=(2,1,1)+sum_weight.chunksize,dtype=np.double)[:,0,0,:,:]
     
     imaging_weight = _graph_standard_degrid(vis_dataset, grid_of_imaging_weights, briggs_factors, cgk_1D, grid_parms)

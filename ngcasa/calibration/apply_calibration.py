@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-def calapply(vis_dataset, cal_dataset, apply_parms, storage_parms):
+def apply_calibration(vis_dataset, cal_dataset, apply_parms, storage_parms):
     """
     .. todo::
         This function is not yet implemented

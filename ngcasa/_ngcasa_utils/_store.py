@@ -51,5 +51,5 @@ def _store(dataset,list_xarray_data_variables,storage_parms):
             print('##################### Created new dataset with',storage_parms['graph_name'],'#####################')
             return stored_dataset
     
-    print('##################### Created graph for make_psf #####################')
+    print('##################### Created graph for',storage_parms['graph_name'],'#####################')
     return dataset

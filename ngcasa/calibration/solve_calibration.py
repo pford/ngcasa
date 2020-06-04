@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 
-def calsolve(vis_dataset, cal_dataset, solve_parms, storage_parm):
+def solve_calibration(vis_dataset, cal_dataset, solve_parms, storage_parm):
     """
     .. todo::
         This function is not yet implemented

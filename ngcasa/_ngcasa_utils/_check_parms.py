@@ -25,6 +25,7 @@ def _check_parms(parm_dict, string_key, acceptable_data_types, acceptable_data =
     acceptable_range : list (length of 2)
     list_acceptable_data_types : list
     list_len : int
+        If list_len is -1 than the list can be any length.
     default :
     Returns
     -------
@@ -36,10 +37,11 @@ def _check_parms(parm_dict, string_key, acceptable_data_types, acceptable_data =
 
     if string_key in parm_dict:
         if (list in acceptable_data_types) or (np.array in acceptable_data_types):
-            if len(parm_dict[string_key]) != list_len:
+            if (len(parm_dict[string_key]) != list_len) and (list_len != -1):
                 print('######### ERROR:Parameter ', string_key, 'must be a list of ', list_acceptable_data_types, ' and length', list_len , '. Wrong length.')
                 return False
             else:
+                list_len = len(parm_dict[string_key])
                 for i in range(list_len):
                     type_check = False
                     for lt in list_acceptable_data_types:
@@ -100,6 +102,7 @@ def _check_storage_parms(storage_parms,default_outfile,graph_name):
     parms_passed = True
     
     if not(_check_parms(storage_parms, 'to_disk', [bool], default=False)): parms_passed = False
+    if not(_check_parms(storage_parms, 'graph_name', [str],default=graph_name)): parms_passed = False
     
     if storage_parms['to_disk'] == True:
         if not(_check_parms(storage_parms, 'outfile', [str],default=default_outfile)): parms_passed = False
@@ -107,7 +110,7 @@ def _check_storage_parms(storage_parms,default_outfile,graph_name):
         if not(_check_parms(storage_parms, 'compressor', [Blosc],default=Blosc(cname='zstd', clevel=2, shuffle=0))): parms_passed = False
         if not(_check_parms(storage_parms, 'chunks_on_disk', [dict],default={})): parms_passed = False
         if not(_check_parms(storage_parms, 'chunks_return', [dict],default={})): parms_passed = False
-        if not(_check_parms(storage_parms, 'graph_name', [str],default=graph_name)): parms_passed = False
+        
     return parms_passed
 
 
